@@ -1,9 +1,7 @@
 package enw
 
 import (
-	"cmp"
 	"reflect"
-	"slices"
 )
 
 type Config struct {
@@ -40,7 +38,8 @@ func (c *Config) Validate() error {
 }
 
 func Collect(config Config) ([]*Env, error) {
-	if err := config.Validate(); err != nil {
+	err := config.Validate()
+	if err != nil {
 		return nil, err
 	}
 
@@ -51,10 +50,6 @@ func Collect(config Config) ([]*Env, error) {
 	)
 
 	vars := New(config.Parser).Collect(config.target, currPrefix, currPath, currPkg)
-
-	slices.SortStableFunc(vars, func(a, b *Env) int {
-		return cmp.Compare(a.Value, b.Value)
-	})
 
 	return vars, nil
 }

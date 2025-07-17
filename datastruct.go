@@ -1,5 +1,9 @@
 package enw
 
+import (
+	"github.com/therenotomorrow/ex"
+)
+
 type Tag struct {
 	Default  string
 	Empty    bool
@@ -15,15 +19,9 @@ type Env struct {
 	Tag     Tag
 }
 
-type ConstError string
-
-func (e ConstError) Error() string {
-	return string(e)
-}
-
 const (
-	ErrMissingTarget ConstError = "missing target"
-	ErrNilTarget     ConstError = "nil target"
-	ErrInvalidTarget ConstError = "invalid target, must be struct or pointer to struct"
-	ErrMissingParser ConstError = "missing parser"
+	ErrMissingTarget ex.L = "missing target"
+	ErrNilTarget     ex.L = "nil target"
+	ErrInvalidTarget ex.L = "invalid target, must be struct or pointer to struct"
+	ErrMissingParser ex.L = "missing parser"
 )

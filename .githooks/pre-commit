@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+just code test
+
+git add .

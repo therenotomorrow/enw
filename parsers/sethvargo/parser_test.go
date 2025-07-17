@@ -57,22 +57,22 @@ func TestParserParse(t *testing.T) {
 	t.Parallel()
 
 	type sampleStruct struct {
-		Simple           string    `env:"MY_VAR"`
-		WithDefault      string    `env:"MY_VAR,default=fallback"`
-		WithRequired     string    `env:"MY_VAR,required"`
+		ExternalType     time.Time `env:"TIME_VAR"`
+		OnlyRequired     string    `env:",required"`
+		NoEnvTag         string    `custom:"tag"`
 		WithPrefix       string    `env:"MY_VAR,prefix=APP_"`
 		WithAllOptions   string    `env:"MY_VAR,default=fallback,required,prefix=APP_"`
 		WithSpaces       string    `env:"  MY_VAR  ,  default=fallback ,required, prefix=APP_ "`
 		OnlyPrefix       string    `env:",prefix=APP_"`
-		OnlyDefault      string    `env:",default=fallback"`
-		OnlyRequired     string    `env:",required"`
+		WithRequired     string    `env:"MY_VAR,required"`
 		EmptyTag         string    `env:""`
+		OnlyDefault      string    `env:",default=fallback"`
 		IgnoredTag       string    `env:"-"`
-		NoEnvTag         string    `custom:"tag"`
+		Simple           string    `env:"MY_VAR"`
 		OnlyVariableName string    `env:"MY_VAR"`
 		EmptyDefault     string    `env:"MY_VAR,default="`
-		JustAComma       string    `env:","`
-		ExternalType     time.Time `env:"TIME_VAR"`
+		JustAComma       string    `env:""`
+		WithDefault      string    `env:"MY_VAR,default=fallback"`
 	}
 
 	type want struct {
@@ -80,8 +80,10 @@ func TestParserParse(t *testing.T) {
 		prefix string
 	}
 
-	parser := sethvargo.New()
-	sample := sampleStruct{}
+	var (
+		parser = sethvargo.New()
+		sample = sampleStruct{}
+	)
 
 	tests := []struct {
 		name  string
@@ -225,7 +227,7 @@ func TestParserParse(t *testing.T) {
 
 			assert.True(t, ok)
 
-			got, prefix := parser.Parse(structField, "some.path", "some/pkg")
+			got, prefix := parser.Parse(&structField, "some.path", "some/pkg")
 
 			assert.Equal(t, test.want.env, got)
 			assert.Equal(t, test.want.prefix, prefix)

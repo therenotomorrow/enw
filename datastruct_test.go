@@ -5,13 +5,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/therenotomorrow/enw"
+	"github.com/therenotomorrow/ex"
 )
 
 func TestTag(t *testing.T) {
 	t.Parallel()
 
 	// `exhaustruct` + `types` testing
-	var _ = enw.Tag{
+	_ = enw.Tag{
 		Default:  "default",
 		Empty:    true,
 		Required: true,
@@ -22,7 +23,7 @@ func TestEnv(t *testing.T) {
 	t.Parallel()
 
 	// `exhaustruct` + `types` testing
-	var _ = enw.Env{
+	_ = enw.Env{
 		Field:   "field",
 		Type:    "type",
 		Path:    "path",
@@ -30,14 +31,6 @@ func TestEnv(t *testing.T) {
 		Package: "package",
 		Tag:     enw.Tag{Default: "default", Empty: true, Required: true},
 	}
-}
-
-func TestConstErrorError(t *testing.T) {
-	t.Parallel()
-
-	const err = enw.ConstError("sad")
-
-	assert.Equal(t, "sad", err.Error())
 }
 
 func TestErrorConsistency(t *testing.T) {
@@ -51,7 +44,7 @@ func TestErrorConsistency(t *testing.T) {
 		"invalid target, must be struct or pointer to struct",
 	}
 
-	for _, err := range []enw.ConstError{
+	for _, err := range []ex.L{
 		enw.ErrMissingParser,
 		enw.ErrMissingTarget,
 		enw.ErrNilTarget,

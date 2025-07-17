@@ -1,7 +1,9 @@
 package enw_test
 
 import (
+	"cmp"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,35 +26,150 @@ func TestNew(t *testing.T) {
 func TestParsers(t *testing.T) {
 	t.Parallel()
 
-	var _ = []enw.Parser{
+	_ = []enw.Parser{
 		&sethvargo.Parser{},
 	}
 }
 
-func want() []*enw.Env {
+func wantCollectorCollect() []*enw.Env {
 	return []*enw.Env{
-		{Value: "APP_NAME", Field: "AppName", Type: "string", Path: "AppName", Package: "", Tag: enw.Tag{Empty: true}},
-		// Тип поля Host - string, а не Sample
-		{Value: "DB_HOST", Field: "Host", Type: "string", Path: "DB->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "DB_PORT", Field: "Port", Type: "int", Path: "DB->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		// То же самое для Cache
-		{Value: "CACHE_HOST", Field: "Host", Type: "string", Path: "Cache->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "CACHE_PORT", Field: "Port", Type: "int", Path: "Cache->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		// И для всех элементов срезов
-		{Value: "SRV_HOST", Field: "Host", Type: "string", Path: "Servers->0->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "SRV_PORT", Field: "Port", Type: "int", Path: "Servers->0->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "SRV_HOST", Field: "Host", Type: "string", Path: "Servers->1->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "SRV_PORT", Field: "Port", Type: "int", Path: "Servers->1->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "PTR_SRV_HOST", Field: "Host", Type: "string", Path: "PtrServers->0->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "PTR_SRV_PORT", Field: "Port", Type: "int", Path: "PtrServers->0->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "PTR_SRV_HOST", Field: "Host", Type: "string", Path: "PtrServers->1->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "PTR_SRV_PORT", Field: "Port", Type: "int", Path: "PtrServers->1->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "NIL_SRV_HOST", Field: "Host", Type: "string", Path: "NilInSlice->0->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "NIL_SRV_PORT", Field: "Port", Type: "int", Path: "NilInSlice->0->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "NIL_SRV_HOST", Field: "Host", Type: "string", Path: "NilInSlice->2->Host", Package: testPackage, Tag: enw.Tag{Empty: true}},
-		{Value: "NIL_SRV_PORT", Field: "Port", Type: "int", Path: "NilInSlice->2->Port", Package: testPackage, Tag: enw.Tag{Empty: true}},
+		{
+			Value:   "APP_NAME",
+			Field:   "AppName",
+			Type:    "string",
+			Path:    "AppName",
+			Package: "",
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "DB_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "DB->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "DB_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "DB->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "CACHE_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "Cache->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "CACHE_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "Cache->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "Servers->0->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "Servers->0->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "Servers->1->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "Servers->1->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "PTR_SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "PtrServers->0->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "PTR_SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "PtrServers->0->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "PTR_SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "PtrServers->1->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "PTR_SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "PtrServers->1->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "NIL_SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "NilInSlice->0->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "NIL_SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "NilInSlice->0->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "NIL_SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "NilInSlice->2->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
+		{
+			Value:   "NIL_SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "NilInSlice->2->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Empty: true},
+		},
 	}
-
 }
 
 func TestCollectorCollect(t *testing.T) {
@@ -64,14 +181,14 @@ func TestCollectorCollect(t *testing.T) {
 	}
 
 	type sampleConfig struct {
-		AppName    string    `env:"APP_NAME"`
-		DB         Sample    `env:",prefix=DB_"`
 		Cache      *Sample   `env:",prefix=CACHE_"`
 		EmptyCache *Sample   `env:",prefix=EMPTY_"`
+		AppName    string    `env:"APP_NAME"`
+		unexported string    `env:"UNEXPORTED"` //nolint:unused // this is used for tests
+		DB         Sample    `env:",prefix=DB_"`
 		Servers    []Sample  `env:",prefix=SRV_"`
 		PtrServers []*Sample `env:",prefix=PTR_SRV_"`
 		NilInSlice []*Sample `env:",prefix=NIL_SRV_"`
-		unexported string    `env:"UNEXPORTED"`
 	}
 
 	var (
@@ -97,7 +214,7 @@ func TestCollectorCollect(t *testing.T) {
 				PtrServers: []*Sample{&srv1, &srv2},
 				NilInSlice: []*Sample{&srv1, nil, &srv2},
 			},
-			want: want(),
+			want: wantCollectorCollect(),
 		},
 		{
 			name: "full config walk as a pointer",
@@ -110,7 +227,7 @@ func TestCollectorCollect(t *testing.T) {
 				PtrServers: []*Sample{&srv1, &srv2},
 				NilInSlice: []*Sample{&srv1, nil, &srv2},
 			},
-			want: want(),
+			want: wantCollectorCollect(),
 		},
 		{name: "nil struct", input: nil, want: []*enw.Env{}},
 		{name: "empty struct", input: struct{}{}, want: []*enw.Env{}},
@@ -119,9 +236,15 @@ func TestCollectorCollect(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			obj := enw.New(sethvargo.New())
 
 			got := obj.Collect(reflect.ValueOf(test.input), "", "", "")
+
+			slices.SortStableFunc(test.want, func(a, b *enw.Env) int {
+				return cmp.Compare(a.Value, b.Value)
+			})
 
 			assert.Len(t, got, len(test.want))
 			assert.Equal(t, test.want, got)

@@ -42,7 +42,7 @@ func (p *Parser) Config() Config {
 	return p.config
 }
 
-func (p *Parser) Parse(field reflect.StructField, path string, pkg string) (*enw.Env, string) {
+func (p *Parser) Parse(field *reflect.StructField, path string, pkg string) (*enw.Env, string) {
 	tagVal := field.Tag.Get(p.config.TagKey)
 
 	if tagVal == "" || tagVal == "-" {

@@ -1,6 +1,8 @@
 package enw_test
 
 import (
+	"cmp"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,9 +19,9 @@ func TestConfigValidate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name   string
-		config enw.Config
 		want   error
+		config enw.Config
+		name   string
 	}{
 		{
 			name:   "success with struct",
@@ -69,39 +71,79 @@ func TestConfigValidate(t *testing.T) {
 	}
 }
 
+func wantCollect() []*enw.Env {
+	return []*enw.Env{
+		{
+			Value:   "APP_NAME",
+			Field:   "AppName",
+			Type:    "string",
+			Path:    "sampleConfig->AppName",
+			Package: testPackage,
+			Tag:     enw.Tag{Default: "", Empty: true, Required: false},
+		},
+		{
+			Value:   "DB_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "sampleConfig->DB->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Default: "", Empty: true, Required: false},
+		},
+		{
+			Value:   "DB_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "sampleConfig->DB->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Default: "", Empty: true, Required: false},
+		},
+		{
+			Value:   "SRV_HOST",
+			Field:   "Host",
+			Type:    "string",
+			Path:    "sampleConfig->Servers->0->Host",
+			Package: testPackage,
+			Tag:     enw.Tag{Default: "", Empty: true, Required: false},
+		},
+		{
+			Value:   "SRV_PORT",
+			Field:   "Port",
+			Type:    "int",
+			Path:    "sampleConfig->Servers->0->Port",
+			Package: testPackage,
+			Tag:     enw.Tag{Default: "", Empty: true, Required: false},
+		},
+	}
+}
+
 func TestCollect(t *testing.T) {
 	t.Parallel()
 
-	// Определяем тестовые структуры
 	type Sample struct {
 		Host string `env:"HOST"`
 		Port int    `env:"PORT"`
 	}
+
 	type sampleConfig struct {
 		AppName string   `env:"APP_NAME"`
 		DB      Sample   `env:",prefix=DB_"`
 		Servers []Sample `env:",prefix=SRV_"`
 	}
 
-	// Готовим данные
-	dbConf := Sample{Host: "db.local", Port: 5432}
-	srv1 := Sample{Host: "srv1.local", Port: 8080}
-
-	// Ожидаемый результат для успешного кейса
-	pkgPath := "github.com/therenotomorrow/enw_test"
-	wantEnvs := []*enw.Env{
-		{Value: "APP_NAME", Field: "AppName", Type: "string", Path: "sampleConfig->AppName", Package: pkgPath},
-		{Value: "DB_HOST", Field: "Host", Type: "string", Path: "sampleConfig->DB->Host", Package: pkgPath},
-		{Value: "DB_PORT", Field: "Port", Type: "int", Path: "sampleConfig->DB->Port", Package: pkgPath},
-		{Value: "SRV_HOST", Field: "Host", Type: "string", Path: "sampleConfig->Servers->0->Host", Package: pkgPath},
-		{Value: "SRV_PORT", Field: "Port", Type: "int", Path: "sampleConfig->Servers->0->Port", Package: pkgPath},
+	type want struct {
+		err  error
+		envs []*enw.Env
 	}
 
-	testCases := []struct {
-		name     string
-		config   enw.Config
-		wantEnvs []*enw.Env
-		wantErr  error
+	var (
+		srv1   = Sample{Host: "srv1.local", Port: 8080}
+		dbConf = Sample{Host: "db.local", Port: 5432}
+	)
+
+	tests := []struct {
+		config enw.Config
+		name   string
+		want   want
 	}{
 		{
 			name: "Success with Struct Value",
@@ -109,8 +151,7 @@ func TestCollect(t *testing.T) {
 				Target: sampleConfig{AppName: "MyApp", DB: dbConf, Servers: []Sample{srv1}},
 				Parser: sethvargo.New(),
 			},
-			wantEnvs: wantEnvs,
-			wantErr:  nil,
+			want: want{envs: wantCollect(), err: nil},
 		},
 		{
 			name: "Success with Struct Pointer",
@@ -118,8 +159,7 @@ func TestCollect(t *testing.T) {
 				Target: &sampleConfig{AppName: "MyApp", DB: dbConf, Servers: []Sample{srv1}},
 				Parser: sethvargo.New(),
 			},
-			wantEnvs: wantEnvs,
-			wantErr:  nil,
+			want: want{envs: wantCollect(), err: nil},
 		},
 		{
 			name: "Failure on Invalid Target",
@@ -127,31 +167,22 @@ func TestCollect(t *testing.T) {
 				Target: 123,
 				Parser: sethvargo.New(),
 			},
-			wantEnvs: nil,
-			wantErr:  enw.ErrInvalidTarget,
+			want: want{envs: nil, err: enw.ErrInvalidTarget},
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Мы передаем неполные данные в мок-парсер, так что нам не нужно сравнивать их полностью.
-			// Этот тест сфокусирован на логике Collect, а не на парсинге.
-			// Для полной проверки мы бы использовали настоящий sethvargo.Parser.
+			got, err := enw.Collect(test.config)
 
-			gotEnvs, err := enw.Collect(tc.config)
+			slices.SortStableFunc(test.want.envs, func(a, b *enw.Env) int {
+				return cmp.Compare(a.Value, b.Value)
+			})
 
-			if tc.wantErr != nil {
-				assert.ErrorIs(t, err, tc.wantErr)
-				assert.Nil(t, gotEnvs)
-			} else {
-				assert.NoError(t, err)
-				// Упрощенное сравнение для демонстрации
-				assert.Equal(t, len(tc.wantEnvs), len(gotEnvs), "Number of collected envs mismatch")
-				// Для полного сравнения можно использовать assert.Equal(t, tc.wantEnvs, gotEnvs)
-				// но это потребует точного заполнения всех полей в mockParser
-			}
+			require.ErrorIs(t, err, test.want.err)
+			assert.Equal(t, test.want.envs, got)
 		})
 	}
 }

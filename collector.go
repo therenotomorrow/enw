@@ -1,20 +1,22 @@
 package enw
 
 import (
+	"cmp"
 	"fmt"
 	"reflect"
+	"slices"
 	"sync"
 )
 
 type (
 	Parser interface {
-		Parse(field reflect.StructField, path string, pkg string) (env *Env, prefix string)
+		Parse(field *reflect.StructField, path string, pkg string) (env *Env, prefix string)
 	}
 
 	Collector struct {
-		mutex     sync.Mutex
 		parser    Parser
 		variables []*Env
+		mutex     sync.Mutex
 	}
 )
 
@@ -30,6 +32,10 @@ func (c *Collector) Collect(rValue reflect.Value, currPrefix string, currPath st
 
 	variables := c.variables
 	c.variables = make([]*Env, 0)
+
+	slices.SortStableFunc(variables, func(a, b *Env) int {
+		return cmp.Compare(a.Value, b.Value)
+	})
 
 	return variables
 }
@@ -54,25 +60,21 @@ func (c *Collector) walk(rValue reflect.Value, currPrefix string, currPath strin
 			path = currPath + "->" + path
 		}
 
-		env, prefix := c.parser.Parse(field, path, currPkg)
+		env, prefix := c.parser.Parse(&field, path, currPkg)
 		if env != nil {
 			env.Value = currPrefix + env.Value
 
 			c.variables = append(c.variables, env)
 		}
 
-		switch fieldValue.Kind() {
-
+		switch fieldValue.Kind() { //nolint:exhaustive // we don't need other kinds here
 		case reflect.Slice, reflect.Array:
-			// Итерируемся по каждому элементу в срезе/массиве
-			for j := 0; j < fieldValue.Len(); j++ {
+			for j := range fieldValue.Len() {
 				elem := fieldValue.Index(j)
 
-				// Проверяем, является ли элемент структурой (или указателем на нее)
 				if nested, ok := extractStruct(elem); ok {
-					// Формируем путь с индексом, например "Servers->0"
 					elemPath := fmt.Sprintf("%s->%d", path, j)
-					// Запускаем рекурсию для элемента
+
 					c.walk(nested, currPrefix+prefix, elemPath, nested.Type().PkgPath())
 				}
 			}
