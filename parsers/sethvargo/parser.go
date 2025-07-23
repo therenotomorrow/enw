@@ -27,7 +27,7 @@ type (
 )
 
 func New() *Parser {
-	return &Parser{config: Config{TagKey: defaultTagKey}}
+	return NewWithConfig(Config{TagKey: defaultTagKey})
 }
 
 func NewWithConfig(config Config) *Parser {
@@ -87,7 +87,8 @@ func (p *Parser) Parse(field *reflect.StructField, path string, pkg string) (*en
 	}
 
 	return &enw.Env{
-		Value:   value,
+		Var:     value,
+		Val:     "",
 		Field:   field.Name,
 		Type:    fieldType,
 		Path:    path,

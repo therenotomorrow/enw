@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func New(parser Parser) (*Collector, error) {
+func NewCollector(parser Parser) (*Collector, error) {
 	if parser == nil {
 		return nil, ErrMissingParser
 	}
@@ -56,7 +56,7 @@ func (c *Collector) Collect(target any) ([]*Env, error) {
 	c.variables = make([]*Env, 0)
 
 	slices.SortStableFunc(variables, func(a, b *Env) int {
-		return cmp.Compare(a.Value, b.Value)
+		return cmp.Compare(a.Var, b.Var)
 	})
 
 	return variables, nil
@@ -80,7 +80,7 @@ func (c *Collector) walk(rValue reflect.Value, currPrefix string, currPath strin
 
 		env, prefix := c.parser.Parse(&field, path, currPkg)
 		if env != nil {
-			env.Value = currPrefix + env.Value
+			env.Var = currPrefix + env.Var
 
 			c.variables = append(c.variables, env)
 		}

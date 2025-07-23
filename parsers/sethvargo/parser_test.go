@@ -95,7 +95,7 @@ func TestParserParse(t *testing.T) {
 			field: "Simple",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "Simple",
 					Type:    "string",
 					Path:    "some.path",
@@ -110,7 +110,7 @@ func TestParserParse(t *testing.T) {
 			field: "WithDefault",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "WithDefault",
 					Type:    "string",
 					Path:    "some.path",
@@ -125,7 +125,7 @@ func TestParserParse(t *testing.T) {
 			field: "WithRequired",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "WithRequired",
 					Type:    "string",
 					Path:    "some.path",
@@ -140,7 +140,7 @@ func TestParserParse(t *testing.T) {
 			field: "WithPrefix",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "WithPrefix",
 					Type:    "string",
 					Path:    "some.path",
@@ -155,7 +155,7 @@ func TestParserParse(t *testing.T) {
 			field: "WithAllOptions",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "WithAllOptions",
 					Type:    "string",
 					Path:    "some.path",
@@ -170,7 +170,7 @@ func TestParserParse(t *testing.T) {
 			field: "WithSpaces",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "WithSpaces",
 					Type:    "string",
 					Path:    "some.path",
@@ -185,7 +185,7 @@ func TestParserParse(t *testing.T) {
 			field: "EmptyDefault",
 			want: want{
 				env: &enw.Env{
-					Value:   "MY_VAR",
+					Var:     "MY_VAR",
 					Field:   "EmptyDefault",
 					Type:    "string",
 					Path:    "some.path",
@@ -200,7 +200,7 @@ func TestParserParse(t *testing.T) {
 			field: "ExternalType",
 			want: want{
 				env: &enw.Env{
-					Value:   "TIME_VAR",
+					Var:     "TIME_VAR",
 					Field:   "ExternalType",
 					Type:    "time.Time",
 					Path:    "some.path",

@@ -15,7 +15,7 @@ const (
 	testPackage = "github.com/therenotomorrow/enw_test"
 )
 
-func TestNew(t *testing.T) {
+func TestNewCollector(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			obj, err := enw.New(test.args.parser)
+			obj, err := enw.NewCollector(test.args.parser)
 			if test.err != nil {
 				require.ErrorIs(t, err, test.err)
 				assert.Nil(t, obj)
@@ -57,7 +57,7 @@ func TestParsers(t *testing.T) {
 func wantCollectorCollect() []*enw.Env {
 	return []*enw.Env{
 		{
-			Value:   "APP_NAME",
+			Var:     "APP_NAME",
 			Field:   "AppName",
 			Type:    "string",
 			Path:    "sampleConfig->AppName",
@@ -65,7 +65,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "DB_HOST",
+			Var:     "DB_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->DB->Host",
@@ -73,7 +73,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "DB_PORT",
+			Var:     "DB_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->DB->Port",
@@ -81,7 +81,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "CACHE_HOST",
+			Var:     "CACHE_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->Cache->Host",
@@ -89,7 +89,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "CACHE_PORT",
+			Var:     "CACHE_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->Cache->Port",
@@ -97,7 +97,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "SRV_HOST",
+			Var:     "SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->Servers->0->Host",
@@ -105,7 +105,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "SRV_PORT",
+			Var:     "SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->Servers->0->Port",
@@ -113,7 +113,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "SRV_HOST",
+			Var:     "SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->Servers->1->Host",
@@ -121,7 +121,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "SRV_PORT",
+			Var:     "SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->Servers->1->Port",
@@ -129,7 +129,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "PTR_SRV_HOST",
+			Var:     "PTR_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->PtrServers->0->Host",
@@ -137,7 +137,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "PTR_SRV_PORT",
+			Var:     "PTR_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->PtrServers->0->Port",
@@ -145,7 +145,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "PTR_SRV_HOST",
+			Var:     "PTR_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->PtrServers->1->Host",
@@ -153,7 +153,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "PTR_SRV_PORT",
+			Var:     "PTR_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->PtrServers->1->Port",
@@ -161,7 +161,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "NIL_SRV_HOST",
+			Var:     "NIL_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->NilInSlice->0->Host",
@@ -169,7 +169,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "NIL_SRV_PORT",
+			Var:     "NIL_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->NilInSlice->0->Port",
@@ -177,7 +177,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "NIL_SRV_HOST",
+			Var:     "NIL_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
 			Path:    "sampleConfig->NilInSlice->2->Host",
@@ -185,7 +185,7 @@ func wantCollectorCollect() []*enw.Env {
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
-			Value:   "NIL_SRV_PORT",
+			Var:     "NIL_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
 			Path:    "sampleConfig->NilInSlice->2->Port",
@@ -287,7 +287,7 @@ func TestCollectorCollect(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			obj, err := enw.New(sethvargo.New())
+			obj, err := enw.NewCollector(sethvargo.New())
 
 			require.NoError(t, err)
 
@@ -296,7 +296,7 @@ func TestCollectorCollect(t *testing.T) {
 			require.ErrorIs(t, err, test.want.err)
 
 			slices.SortStableFunc(test.want.envs, func(a, b *enw.Env) int {
-				return cmp.Compare(a.Value, b.Value)
+				return cmp.Compare(a.Var, b.Var)
 			})
 
 			assert.Len(t, got, len(test.want.envs))

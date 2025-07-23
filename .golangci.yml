@@ -21,6 +21,9 @@ linters:
       allow:
         - error
         - generic
+    wrapcheck:
+      ignore-package-globs:
+        - github.com/therenotomorrow/ex
   exclusions:
     rules:
       # simple rules for examples and tests
