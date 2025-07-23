@@ -2,11 +2,11 @@ package enw_test
 
 import (
 	"cmp"
-	"reflect"
 	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/therenotomorrow/enw"
 	"github.com/therenotomorrow/enw/parsers/sethvargo"
 )
@@ -18,9 +18,32 @@ const (
 func TestNew(t *testing.T) {
 	t.Parallel()
 
-	obj := enw.New(sethvargo.New())
+	type args struct {
+		parser enw.Parser
+	}
 
-	assert.NotNil(t, obj)
+	tests := []struct {
+		args args
+		err  error
+		name string
+	}{
+		{name: "success", args: args{parser: sethvargo.New()}, err: nil},
+		{name: "failure", args: args{parser: nil}, err: enw.ErrMissingParser},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			obj, err := enw.New(test.args.parser)
+			if test.err != nil {
+				require.ErrorIs(t, err, test.err)
+				assert.Nil(t, obj)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, obj)
+			}
+		})
+	}
 }
 
 func TestParsers(t *testing.T) {
@@ -37,15 +60,15 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "APP_NAME",
 			Field:   "AppName",
 			Type:    "string",
-			Path:    "AppName",
-			Package: "",
+			Path:    "sampleConfig->AppName",
+			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
 		{
 			Value:   "DB_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "DB->Host",
+			Path:    "sampleConfig->DB->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -53,7 +76,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "DB_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "DB->Port",
+			Path:    "sampleConfig->DB->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -61,7 +84,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "CACHE_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "Cache->Host",
+			Path:    "sampleConfig->Cache->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -69,7 +92,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "CACHE_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "Cache->Port",
+			Path:    "sampleConfig->Cache->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -77,7 +100,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "Servers->0->Host",
+			Path:    "sampleConfig->Servers->0->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -85,7 +108,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "Servers->0->Port",
+			Path:    "sampleConfig->Servers->0->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -93,7 +116,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "Servers->1->Host",
+			Path:    "sampleConfig->Servers->1->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -101,7 +124,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "Servers->1->Port",
+			Path:    "sampleConfig->Servers->1->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -109,7 +132,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "PTR_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "PtrServers->0->Host",
+			Path:    "sampleConfig->PtrServers->0->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -117,7 +140,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "PTR_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "PtrServers->0->Port",
+			Path:    "sampleConfig->PtrServers->0->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -125,7 +148,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "PTR_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "PtrServers->1->Host",
+			Path:    "sampleConfig->PtrServers->1->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -133,7 +156,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "PTR_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "PtrServers->1->Port",
+			Path:    "sampleConfig->PtrServers->1->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -141,7 +164,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "NIL_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "NilInSlice->0->Host",
+			Path:    "sampleConfig->NilInSlice->0->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -149,7 +172,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "NIL_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "NilInSlice->0->Port",
+			Path:    "sampleConfig->NilInSlice->0->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -157,7 +180,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "NIL_SRV_HOST",
 			Field:   "Host",
 			Type:    "string",
-			Path:    "NilInSlice->2->Host",
+			Path:    "sampleConfig->NilInSlice->2->Host",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -165,7 +188,7 @@ func wantCollectorCollect() []*enw.Env {
 			Value:   "NIL_SRV_PORT",
 			Field:   "Port",
 			Type:    "int",
-			Path:    "NilInSlice->2->Port",
+			Path:    "sampleConfig->NilInSlice->2->Port",
 			Package: testPackage,
 			Tag:     enw.Tag{Empty: true},
 		},
@@ -174,6 +197,15 @@ func wantCollectorCollect() []*enw.Env {
 
 func TestCollectorCollect(t *testing.T) {
 	t.Parallel()
+
+	type args struct {
+		target any
+	}
+
+	type want struct {
+		err  error
+		envs []*enw.Env
+	}
 
 	type Sample struct {
 		Host string `env:"HOST"`
@@ -199,13 +231,13 @@ func TestCollectorCollect(t *testing.T) {
 	)
 
 	tests := []struct {
-		name  string
-		input any
-		want  []*enw.Env
+		args args
+		name string
+		want want
 	}{
 		{
 			name: "full config walk as a struct",
-			input: sampleConfig{
+			args: args{target: sampleConfig{
 				AppName:    "MyApp",
 				DB:         dbConf,
 				Cache:      &cacheConf,
@@ -213,12 +245,12 @@ func TestCollectorCollect(t *testing.T) {
 				Servers:    []Sample{srv1, srv2},
 				PtrServers: []*Sample{&srv1, &srv2},
 				NilInSlice: []*Sample{&srv1, nil, &srv2},
-			},
-			want: wantCollectorCollect(),
+			}},
+			want: want{envs: wantCollectorCollect(), err: nil},
 		},
 		{
 			name: "full config walk as a pointer",
-			input: &sampleConfig{
+			args: args{target: &sampleConfig{
 				AppName:    "MyApp",
 				DB:         dbConf,
 				Cache:      &cacheConf,
@@ -226,28 +258,49 @@ func TestCollectorCollect(t *testing.T) {
 				Servers:    []Sample{srv1, srv2},
 				PtrServers: []*Sample{&srv1, &srv2},
 				NilInSlice: []*Sample{&srv1, nil, &srv2},
-			},
-			want: wantCollectorCollect(),
+			}},
+			want: want{envs: wantCollectorCollect(), err: nil},
 		},
-		{name: "nil struct", input: nil, want: []*enw.Env{}},
-		{name: "empty struct", input: struct{}{}, want: []*enw.Env{}},
-		{name: "not a struct", input: 123, want: []*enw.Env{}},
+		{
+			name: "nil struct",
+			args: args{target: nil},
+			want: want{envs: nil, err: enw.ErrNilTarget},
+		},
+		{
+			name: "typed but nil struct",
+			args: args{target: (*sampleConfig)(nil)},
+			want: want{envs: nil, err: enw.ErrNilTarget},
+		},
+		{
+			name: "empty struct",
+			args: args{target: struct{}{}},
+			want: want{envs: []*enw.Env{}, err: nil},
+		},
+		{
+			name: "not a struct",
+			args: args{target: 123},
+			want: want{envs: nil, err: enw.ErrInvalidTarget},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			obj := enw.New(sethvargo.New())
+			obj, err := enw.New(sethvargo.New())
 
-			got := obj.Collect(reflect.ValueOf(test.input), "", "", "")
+			require.NoError(t, err)
 
-			slices.SortStableFunc(test.want, func(a, b *enw.Env) int {
+			got, err := obj.Collect(test.args.target)
+
+			require.ErrorIs(t, err, test.want.err)
+
+			slices.SortStableFunc(test.want.envs, func(a, b *enw.Env) int {
 				return cmp.Compare(a.Value, b.Value)
 			})
 
-			assert.Len(t, got, len(test.want))
-			assert.Equal(t, test.want, got)
+			assert.Len(t, got, len(test.want.envs))
+			assert.Equal(t, test.want.envs, got)
 		})
 	}
 }

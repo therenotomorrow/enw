@@ -20,15 +20,37 @@ type (
 	}
 )
 
-func New(parser Parser) *Collector {
-	return &Collector{mutex: sync.Mutex{}, parser: parser, variables: make([]*Env, 0)}
+func New(parser Parser) (*Collector, error) {
+	if parser == nil {
+		return nil, ErrMissingParser
+	}
+
+	return &Collector{mutex: sync.Mutex{}, parser: parser, variables: make([]*Env, 0)}, nil
 }
 
-func (c *Collector) Collect(rValue reflect.Value, currPrefix string, currPath string, currPkg string) []*Env {
+func (c *Collector) Collect(target any) ([]*Env, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	c.walk(rValue, currPrefix, currPath, currPkg)
+	if target == nil {
+		return nil, ErrNilTarget
+	}
+
+	rValue := reflect.ValueOf(target)
+
+	if rValue.Kind() == reflect.Ptr {
+		if rValue.IsNil() {
+			return nil, ErrNilTarget
+		}
+
+		rValue = rValue.Elem()
+	}
+
+	if rValue.Kind() != reflect.Struct {
+		return nil, ErrInvalidTarget
+	}
+
+	c.walk(rValue, "", rValue.Type().Name(), rValue.Type().PkgPath())
 
 	variables := c.variables
 	c.variables = make([]*Env, 0)
@@ -37,16 +59,12 @@ func (c *Collector) Collect(rValue reflect.Value, currPrefix string, currPath st
 		return cmp.Compare(a.Value, b.Value)
 	})
 
-	return variables
+	return variables, nil
 }
 
 func (c *Collector) walk(rValue reflect.Value, currPrefix string, currPath string, currPkg string) {
-	rValue, isStruct := extractStruct(rValue)
-	if !isStruct {
-		return
-	}
-
 	rType := rValue.Type()
+
 	for i := range rType.NumField() {
 		field := rType.Field(i)
 		fieldValue := rValue.Field(i)
