@@ -3,7 +3,7 @@
 A flexible Go module for sourcing configuration variables from multiple, prioritized locations.
 
 This library simplifies configuration management by providing a single, consistent interface to find and search for
-values across different environments, from local development to production deployments in Kubernetes. Taste it! :heart:
+values across different environments, from local development to deployments in Kubernetes. Taste it! :heart:
 
 <div>
   <a href="https://github.com/therenotomorrow/enw/releases" target="_blank">
