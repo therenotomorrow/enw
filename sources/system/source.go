@@ -1,4 +1,4 @@
-package dotenv
+package system
 
 import (
 	"context"
@@ -17,12 +17,15 @@ func New() *Source {
 }
 
 func (s *Source) Extract(_ context.Context) (map[string]string, error) {
-	mapping := make(map[string]string)
+	envs := make(map[string]string)
 
 	for _, env := range os.Environ() {
 		parts := strings.SplitN(env, "=", splitN)
-		mapping[parts[0]] = parts[1]
+
+		if len(parts) > 1 {
+			envs[parts[0]] = parts[1]
+		}
 	}
 
-	return mapping, nil
+	return envs, nil
 }

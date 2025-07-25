@@ -30,6 +30,7 @@ func TestNewCollector(t *testing.T) {
 		{name: "success", args: args{parser: sethvargo.New()}, err: nil},
 		{name: "failure", args: args{parser: nil}, err: enw.ErrMissingParser},
 	}
+
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
@@ -303,4 +304,15 @@ func TestCollectorCollect(t *testing.T) {
 			assert.Equal(t, test.want.envs, got)
 		})
 	}
+
+	t.Run("cached collection", func(t *testing.T) {
+		t.Parallel()
+
+		obj, err := enw.NewCollector(sethvargo.New())
+
+		require.NoError(t, err)
+
+		_, _ = obj.Collect(cacheConf)
+		_, _ = obj.Collect(cacheConf)
+	})
 }

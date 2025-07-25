@@ -30,6 +30,7 @@ func TestEnv(t *testing.T) {
 		Var:     "var",
 		Val:     "val",
 		Package: "package",
+		Source:  "source",
 		Tag:     enw.Tag{Default: "default", Empty: true, Required: true},
 	}
 }
@@ -55,20 +56,53 @@ func TestErrorConsistency(t *testing.T) {
 		"nil target",
 		"invalid target, must be struct or pointer to struct",
 		"missing parser",
-		"missing source",
+		"missing sources",
 		"empty envs",
+		"not unique source",
 	}
 
-	for _, err := range []ex.C{
+	for _, err := range []ex.Const{
 		enw.ErrMissingTarget,
 		enw.ErrNilTarget,
 		enw.ErrInvalidTarget,
 		enw.ErrMissingParser,
-		enw.ErrMissingSource,
+		enw.ErrMissingSources,
 		enw.ErrEmptyEnvs,
+		enw.ErrNotUniqueSource,
 	} {
 		got = append(got, err.Error())
 	}
 
 	assert.Equal(t, want, got)
+}
+
+func TestNew(t *testing.T) {
+	t.Parallel()
+
+	type args struct {
+		key string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{name: "empty", args: args{key: ""}, want: ""},
+		{name: "smoke", args: args{key: "hehe"}, want: "hehe"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := enw.New(test.args.key)
+			obj := new(enw.Env)
+
+			obj.Var = test.args.key
+
+			assert.Equal(t, test.want, got.Var)
+			assert.Equal(t, obj, got)
+		})
+	}
 }

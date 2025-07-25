@@ -2,6 +2,8 @@ package dotenv
 
 import (
 	"context"
+	"errors"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/therenotomorrow/ex"
@@ -10,7 +12,7 @@ import (
 const (
 	defaultFilename = ".env"
 
-	ErrMissingFile ex.C = "missing file"
+	ErrMissingFile ex.Const = "missing file"
 )
 
 type (
@@ -40,10 +42,14 @@ func (s *Source) Config() Config {
 }
 
 func (s *Source) Extract(_ context.Context) (map[string]string, error) {
-	mapping, err := godotenv.Read(s.config.Filename)
-	if err != nil {
-		return nil, ErrMissingFile.Because(err)
+	envs, err := godotenv.Read(s.config.Filename)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, ErrMissingFile
 	}
 
-	return mapping, nil
+	if err != nil {
+		return nil, ex.Unexpected(err)
+	}
+
+	return envs, nil
 }

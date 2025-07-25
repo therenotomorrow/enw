@@ -17,7 +17,15 @@ type Env struct {
 	Var     string
 	Val     string
 	Package string
+	Source  string
 	Tag     Tag
+}
+
+func New(key string) *Env {
+	env := new(Env)
+	env.Var = key
+
+	return env
 }
 
 func (e *Env) Anonymous() bool {
@@ -25,10 +33,12 @@ func (e *Env) Anonymous() bool {
 }
 
 const (
-	ErrMissingTarget ex.C = "missing target"
-	ErrNilTarget     ex.C = "nil target"
-	ErrInvalidTarget ex.C = "invalid target, must be struct or pointer to struct"
-	ErrMissingParser ex.C = "missing parser"
-	ErrMissingSource ex.C = "missing source"
-	ErrEmptyEnvs     ex.C = "empty envs"
+	ErrMissingTarget   ex.Const = "missing target"
+	ErrNilTarget       ex.Const = "nil target"
+	ErrInvalidTarget   ex.Const = "invalid target, must be struct or pointer to struct"
+	ErrMissingParser   ex.Const = "missing parser"
+	ErrMissingSources  ex.Const = "missing sources"
+	ErrNotUniqueSource ex.Const = "not unique source"
+	ErrEmptyEnvs       ex.Const = "empty envs"
+	ErrEnvNotFound     ex.Const = "env not found"
 )

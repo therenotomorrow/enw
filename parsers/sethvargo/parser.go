@@ -93,6 +93,7 @@ func (p *Parser) Parse(field *reflect.StructField, path string, pkg string) (*en
 		Type:    fieldType,
 		Path:    path,
 		Package: pkg,
+		Source:  "",
 		Tag:     tag,
 	}, prefix
 }

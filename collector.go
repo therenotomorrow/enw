@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
-	"sync"
 )
 
 type (
@@ -16,7 +15,6 @@ type (
 	Collector struct {
 		parser    Parser
 		variables []*Env
-		mutex     sync.Mutex
 	}
 )
 
@@ -25,15 +23,16 @@ func NewCollector(parser Parser) (*Collector, error) {
 		return nil, ErrMissingParser
 	}
 
-	return &Collector{mutex: sync.Mutex{}, parser: parser, variables: make([]*Env, 0)}, nil
+	return &Collector{parser: parser, variables: make([]*Env, 0)}, nil
 }
 
 func (c *Collector) Collect(target any) ([]*Env, error) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
 	if target == nil {
 		return nil, ErrNilTarget
+	}
+
+	if len(c.variables) != 0 {
+		return c.variables, nil
 	}
 
 	rValue := reflect.ValueOf(target)
@@ -52,14 +51,11 @@ func (c *Collector) Collect(target any) ([]*Env, error) {
 
 	c.walk(rValue, "", rValue.Type().Name(), rValue.Type().PkgPath())
 
-	variables := c.variables
-	c.variables = make([]*Env, 0)
-
-	slices.SortStableFunc(variables, func(a, b *Env) int {
+	slices.SortStableFunc(c.variables, func(a, b *Env) int {
 		return cmp.Compare(a.Var, b.Var)
 	})
 
-	return variables, nil
+	return c.variables, nil
 }
 
 func (c *Collector) walk(rValue reflect.Value, currPrefix string, currPath string, currPkg string) {

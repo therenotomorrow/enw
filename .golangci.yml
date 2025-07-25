@@ -7,7 +7,7 @@ linters:
     - wsl
     # rule dependencies in other way
     - depguard
-    # fixme: remove revive later
+    # just use more examples
     - revive
   settings:
     cyclop:
