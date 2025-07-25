@@ -9,8 +9,8 @@ values across different environments, from local development to production deplo
   <a href="https://github.com/therenotomorrow/enw/releases" target="_blank">
     <img src="https://img.shields.io/github/v/release/therenotomorrow/enw?color=FBC02D" alt="GitHub releases">
   </a>
-  <a href="https://go.dev/doc/go1.21" target="_blank">
-    <img src="https://img.shields.io/badge/Go-%3E%3D%201.21-blue.svg" alt="Go 1.21">
+  <a href="https://go.dev/doc/go1.24" target="_blank">
+    <img src="https://img.shields.io/badge/Go-%3E%3D%201.24-blue.svg" alt="Go 1.24">
   </a>
   <a href="https://pkg.go.dev/github.com/therenotomorrow/enw" target="_blank">
     <img src="https://godoc.org/github.com/therenotomorrow/enw?status.svg" alt="Go reference">
